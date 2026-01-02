@@ -1,0 +1,47 @@
+{{ $section := .Site.GetPage "/safiran" }}
+{{/* چک کردن اینکه سکشن پیدا شد یا خیر - جلوگیری از کرش کردن */}}
+{{ if $section }}
+  {{ $provinces := $section.Sections }}
+  {{ $total := 0 }}
+
+  <div class="overflow-x-auto my-6">
+    <table class="min-w-full border-collapse border border-gray-200">
+      <thead class="bg-gray-100">
+        <tr>
+          <th class="border border-gray-300 px-4 py-2 text-center">استان</th>
+          <th class="border border-gray-300 px-4 py-2 text-center">تعداد سفیر</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{ range $provinces }}
+          {{/* شمارش فقط صفحات معمولی (سفیران) داخل هر استان */}}
+          {{ $count := len .RegularPages }}
+          
+          {{ if gt $count 0 }}
+            {{ $total = add $total $count }}
+            <tr class="hover:bg-gray-50">
+              <td class="border border-gray-300 px-4 py-2 text-center font-medium">
+                  <a href="{{ .Permalink }}" class="text-blue-600 hover:underline">
+                    {{ .Title }}
+                  </a>
+              </td>
+              <td class="border border-gray-300 px-4 py-2 text-center">{{ $count }}</td>
+            </tr>
+          {{ end }}
+        {{ end }}
+
+        {{/* ردیف مجموع */}}
+        <tr class="bg-gray-200 font-bold">
+          <td class="border border-gray-300 px-4 py-2 text-center">مجموع کل</td>
+          <td class="border border-gray-300 px-4 py-2 text-center">{{ $total }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="text-xs text-gray-500 mt-2 text-center">
+    آخرین بروزرسانی سیستم: {{ now.Format "2006-01-02" }}
+  </div>
+
+{{ else }}
+  <p style="color:red; font-weight:bold;">خطای عملیاتی: بخش 'safiran' پیدا نشد. لطفا مسیر فایل _index.md را چک کنید.</p>
+{{ end }}

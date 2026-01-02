@@ -1,0 +1,198 @@
+{{ define "main" }}
+<div class="min-h-screen bg-gray-50" dir="rtl">
+  
+  <div class="container mx-auto px-4 py-12">
+    
+    <div class="prose prose-lg mx-auto mb-16 text-center max-w-4xl bg-white p-8 rounded-xl shadow-sm border border-gray-100">
+      <h1 class="text-3xl font-bold mb-6 text-gray-800">{{ .Title }}</h1>
+      {{ .Content }}
+    </div>
+
+    <div class="max-w-3xl mx-auto">
+      <div class="flex items-center justify-between mb-6 border-b pb-4">
+        <div class="flex items-center gap-2">
+          <h2 class="text-2xl font-bold text-gray-800">شبکه سفیران</h2>
+          <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded ml-2">به تفکیک استان</span>
+        </div>
+        <div class="text-xs text-gray-500">مرتب‌سازی: بیشترین سفیر</div>
+      </div>
+      
+      {{/* الگوریتم مرتب‌سازی */}}
+      {{ $sectionsList := slice }}
+      {{ range .Sections }}
+         {{ $count := len .RegularPages }}
+         {{ $entry := dict "sec" . "cnt" $count }}
+         {{ $sectionsList = $sectionsList | append $entry }}
+      {{ end }}
+      {{ $sortedSections := sort $sectionsList "cnt" "desc" }}
+
+      {{ if eq (len $sortedSections) 0 }}
+         <div class="p-4 mb-4 text-sm text-yellow-800 rounded-lg bg-yellow-50">
+           <span class="font-medium">توجه:</span> پوشه استانی یافت نشد.
+         </div>
+      {{ end }}
+
+      <div class="space-y-3">
+        {{ range $sortedSections }}
+        {{ $section := .sec }}
+        {{ $count := .cnt }}
+
+        <div class="border border-gray-200 rounded-lg bg-white overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200">
+          
+          <button type="button" 
+                  onclick="toggleSection('sec-{{ $section.File.UniqueID }}')"
+                  class="w-full flex justify-between items-center px-6 py-4 bg-white hover:bg-gray-50 transition focus:outline-none select-none">
+            <div class="flex items-center gap-3">
+               <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+               <span class="font-bold text-lg text-gray-700">{{ $section.Title }}</span>
+            </div>
+            <div class="flex items-center gap-3">
+              {{ if gt $count 0 }}
+              <span class="bg-green-100 text-green-700 text-xs font-medium px-2.5 py-1 rounded-full border border-green-200">
+                 {{ $count }} سفیر فعال
+              </span>
+              {{ else }}
+              <span class="bg-gray-100 text-gray-500 text-xs font-medium px-2.5 py-1 rounded-full">
+                 بدون سفیر
+              </span>
+              {{ end }}
+              <svg id="icon-sec-{{ $section.File.UniqueID }}" class="w-4 h-4 text-gray-400 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+            </div>
+          </button>
+
+          <div id="sec-{{ $section.File.UniqueID }}" class="hidden border-t border-gray-100 bg-gray-50/50">
+            {{ if gt $count 0 }}
+            <ul class="divide-y divide-gray-200/60">
+              {{ range $section.RegularPages }}
+              
+              {{ $job := .Params.job | default .Params.params.job | default "تعریف نشده" }}
+              {{ $city := .Params.city | default .Params.params.city | default $section.Title }}
+              {{ $image := .Params.image | default .Params.params.image }}
+              
+              {{/* Unique ID برای هر سفیر جهت دسترسی به محتوا */}}
+              {{ $uniqueID := .File.UniqueID }}
+
+              <div id="content-{{ $uniqueID }}" class="hidden">
+                  {{ .Content }}
+              </div>
+
+              <li class="group p-4 hover:bg-white cursor-pointer transition-colors duration-200 flex items-center gap-4 px-8"
+                  onclick="openAmbassador({
+                    title: '{{ .Title }}',
+                    image: '{{ $image }}',
+                    job: '{{ $job }}',
+                    city: '{{ $city }}', 
+                    contentId: 'content-{{ $uniqueID }}' 
+                  })">
+                  
+                  <div class="w-10 h-10 rounded-full bg-gray-200 overflow-hidden flex-shrink-0 border border-gray-300 group-hover:border-blue-400 transition-colors">
+                    {{ if $image }}
+                      <img src="{{ $image }}" class="w-full h-full object-cover">
+                    {{ else }}
+                      <div class="w-full h-full flex items-center justify-center text-gray-400 bg-gray-100">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
+                      </div>
+                    {{ end }}
+                  </div>
+                  
+                  <div class="flex-grow">
+                    <div class="font-bold text-gray-800 group-hover:text-blue-700 transition-colors">{{ .Title }}</div>
+                    <div class="text-xs text-gray-500 mt-0.5">{{ $job }}</div>
+                  </div>
+                  
+                  <div class="text-gray-300 group-hover:text-blue-500">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                  </div>
+              </li>
+              {{ end }}
+            </ul>
+            {{ else }}
+            <div class="p-6 text-center text-gray-400 text-sm italic bg-white">سفیری ثبت نشده است.</div>
+            {{ end }}
+          </div>
+        </div>
+        {{ end }}
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="ambModal" class="fixed inset-0 z-[100] hidden relative" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+  <div class="fixed inset-0 bg-gray-900/70 transition-opacity backdrop-blur-sm" onclick="closeAmbassador()"></div>
+  
+  <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+    <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
+      
+      <div class="relative transform overflow-hidden rounded-2xl bg-white text-right shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-md border border-gray-100">
+        
+        <div class="h-24 bg-gradient-to-r from-blue-600 to-blue-400"></div> 
+
+        <div class="px-6 pb-6">
+          <div class="relative -mt-12 mb-4 flex justify-center">
+            <div class="w-24 h-24 rounded-full border-4 border-white shadow-md overflow-hidden bg-white">
+               <img id="m-img" src="" class="w-full h-full object-cover">
+            </div>
+          </div>
+          <div class="text-center mb-6">
+            <h3 class="text-xl font-bold text-gray-900 mb-2" id="m-name"></h3>
+            <div class="flex flex-wrap justify-center gap-2 mt-2">
+               <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700">
+                 <svg class="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                 <span id="m-job"></span>
+               </span>
+               <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700">
+                 <svg class="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                 <span id="m-city"></span>
+               </span>
+            </div>
+          </div>
+          
+          <div class="bg-gray-50 rounded-xl p-4 text-sm text-gray-600 border border-gray-100 prose prose-sm prose-blue max-w-none text-justify" id="m-desc">
+            </div>
+          
+          <div class="mt-6">
+            <button type="button" class="inline-flex w-full justify-center rounded-lg bg-gray-900 px-3 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-gray-700 transition" onclick="closeAmbassador()">بستن</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function toggleSection(id) {
+  const el = document.getElementById(id);
+  const icon = document.getElementById('icon-' + id);
+  if (el.classList.contains('hidden')) {
+    el.classList.remove('hidden');
+    icon.classList.add('rotate-180');
+  } else {
+    el.classList.add('hidden');
+    icon.classList.remove('rotate-180');
+  }
+}
+
+function openAmbassador(data) {
+  document.getElementById('m-name').textContent = data.title;
+  document.getElementById('m-job').textContent = data.job;
+  document.getElementById('m-city').textContent = data.city;
+  
+  // خواندن HTML از مخزن مخفی
+  const contentHTML = document.getElementById(data.contentId).innerHTML;
+  // تزریق به عنوان HTML (نه متن ساده)
+  document.getElementById('m-desc').innerHTML = contentHTML;
+  
+  const imgEl = document.getElementById('m-img');
+  if(data.image) {
+    imgEl.src = data.image;
+  } else {
+    imgEl.src = "https://ui-avatars.com/api/?name=" + data.title + "&background=random";
+  }
+  document.getElementById('ambModal').classList.remove('hidden');
+}
+
+function closeAmbassador() {
+  document.getElementById('ambModal').classList.add('hidden');
+}
+</script>
+{{ end }}

@@ -1,0 +1,21 @@
+/* Add your own custom styles here */
+/* Force RTL direction based on HTML attribute */
+html[dir="rtl"] body {
+  direction: rtl;
+  text-align: right;
+}
+
+/* Fix lists and internal alignment */
+html[dir="rtl"] .text-left {
+  text-align: right !important;
+}
+
+html[dir="rtl"] .mr-auto {
+  margin-right: 0 !important;
+  margin-left: auto !important;
+}
+
+html[dir="rtl"] .ml-auto {
+  margin-left: 0 !important;
+  margin-right: auto !important;
+}

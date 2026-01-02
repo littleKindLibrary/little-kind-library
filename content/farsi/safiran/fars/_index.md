@@ -1,0 +1,4 @@
+---
+title: "فارس"
+type: "province"
+---
