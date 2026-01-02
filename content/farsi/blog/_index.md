@@ -1,5 +1,5 @@
 ---
-title: "Blog Posts"
+title: "قصه‌ها و خبرها"
 meta_title: ""
-description: "this is meta description"
+description: "اینجا با شما حرف می زنیم"
 ---

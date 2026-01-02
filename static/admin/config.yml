@@ -1,0 +1,25 @@
+backend:
+  name: git-gateway
+  branch: main # شاخه اصلی پروژه شما
+
+media_folder: "static/images/uploads" # عکس‌های آپلودی اینجا ذخیره می‌شوند
+public_folder: "/images/uploads" # آدرسی که در سایت استفاده می‌شود
+
+# تنظیمات زبان فارسی برای محیط ادمین (اختیاری)
+locale: 'fa'
+
+collections:
+  - name: "safiran"
+    label: "سفیران مهربانی"
+    label_singular: "سفیر"
+    folder: "content/farsi/safiran"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - {label: "نام و نام خانوادگی", name: "title", widget: "string"}
+      - {label: "عکس پروفایل", name: "image", widget: "image", required: false}
+      - {label: "استان", name: "province", widget: "select", options: ["تهران", "خراسان رضوی", "فارس", "اصفهان", "گیلان", "مازندران", "خوزستان", "سایر"]}
+      - {label: "وضعیت", name: "status", widget: "select", options: ["فعال", "غیرفعال"], default: "فعال"}
+      - {label: "بیوگرافی کوتاه", name: "description", widget: "text"}
+      - {label: "تاریخ پیوستن", name: "date", widget: "datetime", format: "YYYY-MM-DD", required: false}
+      - {label: "متن کامل و گزارش‌ها", name: "body", widget: "markdown"}
